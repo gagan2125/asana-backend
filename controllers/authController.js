@@ -46,12 +46,12 @@ exports.verifyOtp = async (req, res) => {
 
 exports.basicInfo = async (req, res) => {
     const { id } = req.params;
-    const { firstName, lastName, emailId } = req.body;
+    const { firstName, lastName, email } = req.body;
 
     try {
         const updatedUser = await User.findByIdAndUpdate(
             id,
-            { firstName, lastName, emailId },
+            { firstName, lastName, email },
             { new: true, runValidators: true }
         );
 
@@ -65,3 +65,35 @@ exports.basicInfo = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }
+
+exports.getUserById = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user", error: error.message });
+    }
+};
+
+exports.update = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const updateData = req.body;
+        const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json({
+            message: "User updated successfully",
+            user: updatedUser
+        });
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ message: "Failed to update user", error: error.message });
+    }
+};
